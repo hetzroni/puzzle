@@ -1,11 +1,14 @@
 import itertools
 import re
-from colorama import Fore, init
+import time
 from pathlib import Path
 
-NEW_COLOR =Fore.LIGHTCYAN_EX
+import colorama
+from colorama import Fore
 
-init(autoreset=True)
+NEW_COLOR = Fore.LIGHTCYAN_EX
+
+colorama.init(autoreset=True)
 
 
 class IllegalSolutionError(Exception):
@@ -105,18 +108,19 @@ def solve(puzzle):
     height, width = size(puzzle)
     board = new_board(puzzle)
     first = True
+    print_board(board, True)
     while True:
         row_diffs = [get_diff(row_regs[i], get_row(board, i)) for i in range(height)]
         apply_row_diffs(board, row_diffs)
         if no_diffs(row_diffs) and not first:
             break
-        print_board(board)
+        print_board(board, True)
         clean_board(board)
         col_diffs = [get_diff(col_regs[i], get_col(board, i)) for i in range(width)]
         apply_col_diffs(board, col_diffs)
         if no_diffs(col_diffs):
             break
-        print_board(board)
+        print_board(board, True)
         clean_board(board)
         first = False
     return board
@@ -134,9 +138,12 @@ def framed(st, size=None):
     return f'{top}\n{middle}\n{bottom}'
 
 
-def print_board(board):
+def print_board(board, go_back=None):
     height, width = board_size(board)
-    print(framed('\n'.join(''.join(line).replace('w', '.').replace('b', chr(9608)).replace('n', 'x') for line in board), size=(height, width)))
+    print(framed('\n'.join(''.join(line).replace('w', '.').replace('b', chr(9608)).replace('n', ' ') for line in board), size=(height, width)))
+    if go_back is not None:
+        print(colorama.Cursor.UP(height + 3))
+        time.sleep(0.1)
 
 
 def clean_board(board):
