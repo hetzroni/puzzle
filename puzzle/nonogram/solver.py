@@ -64,6 +64,13 @@ def get_diff(reg_pair, line):
     for i, bit in enumerate(line):  # return only NEW results about the line
         if bit != 'n':
             diff[i] = 'n'
+    if 'n' in line and 'w' in line:  # 'n' means not done, so next step is relevant. lack of 'w' means line with clean slate, so next step isn't relevant.
+        for i, bit in enumerate(line):
+            if bit == 'n':
+                for new_bit, opposite in ('wb', 'bw'):
+                    if not first_reg.match(line[:i] + new_bit + line[i + 1:]):
+                        diff[i] = opposite
+                        break
     return diff
 
 
