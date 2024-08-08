@@ -1,6 +1,10 @@
 import functools, itertools
 from pprint import pprint as pp
 
+# Top row is A, bottom row is I. Left column in 1, right column is 9.
+# E.g, in order to specify the value of the bottom left cell, you can type: sudoku.I1 = 3
+
+
 # TODO: Support non 9x9 boards
 
 # TODO: A helpful optimization that's essentially another (relatively trivial) sudoku solving trick:
@@ -95,7 +99,7 @@ def gen_constrained_permutation(cells, d):
 def cell_str(s):  # For print_board
   if len(s) == 1:
     return str(next(iter(s)))
-  return '(' + ','.join(map(str, s)) + ')'
+  return '(' + ''.join(map(str, s)) + ')'
 
 
 def chunks(l, size):  # For print_board
@@ -104,9 +108,20 @@ def chunks(l, size):  # For print_board
 
 class Sudoku:
   def __init__(self):
+    # assigning using __dict__ because I'm overriding __setattr__. Maybe not worth it after all...
     # legal values for each cell:
-    self.d = {f'{c}{i}': set(VALUES) for c, i in itertools.product(ROWS, COLUMNS)}
-    self.cell_permutations = []
+    self.__dict__['d'] = {f'{c}{i}': set(VALUES) for c, i in itertools.product(ROWS, COLUMNS)}
+    self.__dict__['cell_permutations'] = []
+  def __setattr__(self, name, value):
+    if name in self.d:
+      self.d[name] = {value}
+    else:
+      super().__setattr__(name, value)
+  def __getattr__(self, name):
+    value = self.d[name]
+    if len(value) == 1:
+      return next(iter(value))
+    return value
   def add_cell_permutation(self, cell_permutation):
     self.cell_permutations.append(cell_permutation)
     cell_permutation.reduce(self.d)
@@ -168,7 +183,7 @@ def main():
 
   sudoku.solve()
   print()
-  sudoku.print_board(pretty=False)
+  sudoku.print_board(pretty=True)
 
 
 if __name__ == '__main__':
